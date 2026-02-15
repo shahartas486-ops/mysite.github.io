@@ -1,0 +1,994 @@
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <h2><i class="fas fa-robot"></i> AI Chat</h2>
+            <div class="version">v2.0</div>
+        </div>
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    
+    <div class="sidebar-content">
+        <div class="user-profile">
+            <div class="profile-avatar" onclick="editProfile()">
+                <i class="fas fa-user-circle"></i>
+                <div class="online-status"></div>
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" id="profile-name">کاربر مهمان</div>
+                <div class="profile-id" id="profile-id">ID: {{ session_id[:8] if session_id else 'N/A' }}</div>
+            </div>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <h3><i class="fas fa-comments"></i> چت‌ها</h3>
+                <button class="menu-item active" onclick="switchChat('ai')">
+                    <i class="fas fa-brain"></i>
+                    <span>هوش مصنوعی</span>
+                </button>
+                <button class="menu-item" onclick="switchChat('support')">
+                    <i class="fas fa-headset"></i>
+                    <span>پشتیبانی</span>
+                    <span class="menu-badge" id="support-badge">0</span>
+                </button>
+            </div>
+            
+            <div class="menu-section">
+                <h3><i class="fas fa-cog"></i> تنظیمات</h3>
+                <button class="menu-item" onclick="showSettings()">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>تنظیمات چت</span>
+                </button>
+                <button class="menu-item" onclick="showThemes()">
+                    <i class="fas fa-palette"></i>
+                    <span>تم‌ها</span>
+                </button>
+                <button class="menu-item" onclick="clearHistory()">
+                    <i class="fas fa-trash"></i>
+                    <span>پاک کردن تاریخچه</span>
+                </button>
+            </div>
+            
+            <div class="menu-section">
+                <h3><i class="fas fa-info-circle"></i> اطلاعات</h3>
+                <button class="menu-item" onclick="showAbout()">
+                    <i class="fas fa-info"></i>
+                    <span>درباره</span>
+                </button>
+                <button class="menu-item" onclick="showHelp()">
+                    <i class="fas fa-question-circle"></i>
+                    <span>راهنما</span>
+                </button>
+                <button class="menu-item" onclick="showShortcuts()">
+                    <i class="fas fa-keyboard"></i>
+                    <span>میانبرها</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <div class="status-item">
+                    <i class="fas fa-server"></i>
+                    <span>سرور: <span class="status-online">آنلاین</span></span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-robot"></i>
+                    <span>AI: <span class="status-online">فعال</span></span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// متغیرهای سایدبار
+let sidebarExpanded = true;
+
+// تغییر وضعیت سایدبار
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebarExpanded = !sidebarExpanded;
+    
+    if (sidebarExpanded) {
+        sidebar.classList.remove('collapsed');
+        localStorage.setItem('sidebar_expanded', 'true');
+    } else {
+        sidebar.classList.add('collapsed');
+        localStorage.setItem('sidebar_expanded', 'false');
+    }
+}
+
+// ویرایش پروفایل
+function editProfile() {
+    const name = prompt('نام جدید خود را وارد کنید:', document.getElementById('profile-name').textContent);
+    if (name && name.trim()) {
+        document.getElementById('profile-name').textContent = name.trim();
+        localStorage.setItem('user_display_name', name.trim());
+        showNotification('نام با موفقیت تغییر کرد', 'success');
+    }
+}
+
+// نمایش تنظیمات
+function showSettings() {
+    const settingsModal = createModal('تنظیمات چت', `
+        <div class="settings-group">
+            <h4><i class="fas fa-bell"></i> اعلان‌ها</h4>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="notify-new-message" checked>
+                    اعلان پیام جدید
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="notify-sound" checked>
+                    صدای اعلان
+                </label>
+            </div>
+        </div>
+        
+        <div class="settings-group">
+            <h4><i class="fas fa-eye"></i> نمایش</h4>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="show-timestamps" checked>
+                    نمایش زمان پیام‌ها
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="show-avatars" checked>
+                    نمایش آواتارها
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="compact-mode">
+                    حالت فشرده
+                </label>
+            </div>
+        </div>
+        
+        <div class="settings-group">
+            <h4><i class="fas fa-robot"></i> هوش مصنوعی</h4>
+            <div class="setting-item">
+                <label>سبک پاسخ‌ها:</label>
+                <select id="ai-style">
+                    <option value="friendly">دوستانه</option>
+                    <option value="professional">حرفه‌ای</option>
+                    <option value="concise">مختصر</option>
+                    <option value="detailed">مفصل</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="ai-learning" checked>
+                    یادگیری از مکالمات
+                </label>
+            </div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-btn save" onclick="saveSettings()">
+                <i class="fas fa-save"></i> ذخیره
+            </button>
+            <button class="modal-btn cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    `);
+}
+
+// نمایش تم‌ها
+function showThemes() {
+    const themesModal = createModal('انتخاب تم', `
+        <div class="themes-grid">
+            <div class="theme-item" onclick="changeTheme('default')" data-theme="default">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #4361ee, #3a0ca3);"></div>
+                <div class="theme-name">پیش‌فرض</div>
+            </div>
+            <div class="theme-item" onclick="changeTheme('dark')" data-theme="dark">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e);"></div>
+                <div class="theme-name">تیره</div>
+            </div>
+            <div class="theme-item" onclick="changeTheme('light')" data-theme="light">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);"></div>
+                <div class="theme-name">روشن</div>
+            </div>
+            <div class="theme-item" onclick="changeTheme('purple')" data-theme="purple">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);"></div>
+                <div class="theme-name">بنفش</div>
+            </div>
+            <div class="theme-item" onclick="changeTheme('green')" data-theme="green">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #2ecc71, #27ae60);"></div>
+                <div class="theme-name">سبز</div>
+            </div>
+            <div class="theme-item" onclick="changeTheme('orange')" data-theme="orange">
+                <div class="theme-preview" style="background: linear-gradient(135deg, #f8961e, #f3722c);"></div>
+                <div class="theme-name">نارنجی</div>
+            </div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    `);
+}
+
+// تغییر تم
+function changeTheme(themeName) {
+    document.body.setAttribute('data-theme', themeName);
+    localStorage.setItem('chat_theme', themeName);
+    showNotification('تم با موفقیت تغییر کرد', 'success');
+}
+
+// نمایش درباره
+function showAbout() {
+    createModal('درباره برنامه', `
+        <div class="about-content">
+            <div class="about-logo">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3>چت هوش مصنوعی v2.0</h3>
+            <p>یک سیستم چت پیشرفته با هوش مصنوعی</p>
+            
+            <div class="about-features">
+                <div class="feature">
+                    <i class="fas fa-brain"></i>
+                    <span>هوش مصنوعی قدرتمند</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-code"></i>
+                    <span>پشتیبانی از LaTeX</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-file-upload"></i>
+                    <span>آپلود فایل</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-palette"></i>
+                    <span>گرافیک زیبا</span>
+                </div>
+            </div>
+            
+            <div class="about-info">
+                <p><strong>توسعه‌دهنده:</strong> تیم توسعه</p>
+                <p><strong>نسخه:</strong> 2.0.0</p>
+                <p><strong>آخرین بروزرسانی:</strong> دی ۱۴۰۲</p>
+            </div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    `);
+}
+
+// نمایش راهنما
+function showHelp() {
+    createModal('راهنمای استفاده', `
+        <div class="help-content">
+            <div class="help-section">
+                <h4><i class="fas fa-comment"></i> ارسال پیام</h4>
+                <ul>
+                    <li>متن خود را در کادر پایین تایپ کنید</li>
+                    <li>برای ارسال از دکمه Enter یا کلیک روی دکمه ارسال استفاده کنید</li>
+                    <li>برای خط جدید از Shift+Enter استفاده کنید</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h4><i class="fas fa-square-root-alt"></i> فرمول‌های ریاضی</h4>
+                <ul>
+                    <li>برای فرمول inline از $...$ استفاده کنید</li>
+                    <li>برای فرمول بلوکی از $$...$$ استفاده کنید</li>
+                    <li>از دکمه <i class="fas fa-square-root-alt"></i> برای کیبورد LaTeX استفاده کنید</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h4><i class="fas fa-file-upload"></i> ارسال فایل</h4>
+                <ul>
+                    <li>از دکمه <i class="fas fa-paperclip"></i> برای انتخاب فایل استفاده کنید</li>
+                    <li>می‌توانید فایل را Drag & Drop کنید</li>
+                    <li>پشتیبانی از تصویر، ویدیو، صدا و PDF</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h4><i class="fas fa-microphone"></i> ضبط صدا</h4>
+                <ul>
+                    <li>از دکمه <i class="fas fa-microphone"></i> برای ضبط صدا استفاده کنید</li>
+                    <li>حداکثر مدت ضبط: 5 دقیقه</li>
+                    <li>نیاز به مجوز دسترسی به میکروفون</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h4><i class="fas fa-keyboard"></i> میانبرهای صفحه کلید</h4>
+                <ul>
+                    <li><kbd>Ctrl + L</kbd> : باز کردن LaTeX</li>
+                    <li><kbd>Ctrl + F</kbd> : جستجو در چت</li>
+                    <li><kbd>Ctrl + D</kbd> : پاک کردن چت</li>
+                    <li><kbd>Esc</kbd> : بستن مودال</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    `);
+}
+
+// نمایش میانبرها
+function showShortcuts() {
+    const shortcuts = [
+        { key: 'Enter', desc: 'ارسال پیام (بدون Shift)' },
+        { key: 'Shift+Enter', desc: 'ایجاد خط جدید' },
+        { key: 'Ctrl+L', desc: 'باز کردن LaTeX' },
+        { key: 'Ctrl+F', desc: 'جستجو در چت' },
+        { key: 'Ctrl+D', desc: 'پاک کردن چت' },
+        { key: 'Ctrl+S', desc: 'ذخیره چت' },
+        { key: 'Esc', desc: 'بستن مودال/لغو' },
+        { key: '↑', desc: 'پیام قبلی' },
+        { key: '↓', desc: 'پیام بعدی' },
+        { key: 'Ctrl+↑', desc: 'اسکرول بالا' },
+        { key: 'Ctrl+↓', desc: 'اسکرول پایین' }
+    ];
+    
+    let shortcutsHTML = '<div class="shortcuts-grid">';
+    shortcuts.forEach(shortcut => {
+        shortcutsHTML += `
+            <div class="shortcut-item">
+                <div class="shortcut-key"><kbd>${shortcut.key}</kbd></div>
+                <div class="shortcut-desc">${shortcut.desc}</div>
+            </div>
+        `;
+    });
+    shortcutsHTML += '</div>';
+    
+    createModal('میانبرهای صفحه کلید', `
+        ${shortcutsHTML}
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    `);
+}
+
+// پاک کردن تاریخچه
+function clearHistory() {
+    if (confirm('آیا از پاک کردن تاریخچه چت خود اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        localStorage.removeItem('chat_history');
+        showNotification('تاریخچه چت پاک شد', 'success');
+        // رفرش صفحه
+        location.reload();
+    }
+}
+
+// خروج
+function logout() {
+    if (confirm('آیا می‌خواهید از حساب خود خارج شوید؟')) {
+        localStorage.removeItem('user_session');
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
+}
+
+// ایجاد مودال
+function createModal(title, content) {
+    const modalId = 'modal-' + Date.now();
+    const modalHTML = `
+        <div class="modal" id="${modalId}">
+            <div class="modal-content">
+                <h3>${title}</h3>
+                ${content}
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // بستن با کلیک خارج
+    const modal = document.getElementById(modalId);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    return modalId;
+}
+
+// بستن مودال
+function closeModal() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => modal.remove());
+}
+
+// ذخیره تنظیمات
+function saveSettings() {
+    const settings = {
+        notifyNewMessage: document.getElementById('notify-new-message')?.checked || true,
+        notifySound: document.getElementById('notify-sound')?.checked || true,
+        showTimestamps: document.getElementById('show-timestamps')?.checked || true,
+        showAvatars: document.getElementById('show-avatars')?.checked || true,
+        compactMode: document.getElementById('compact-mode')?.checked || false,
+        aiStyle: document.getElementById('ai-style')?.value || 'friendly',
+        aiLearning: document.getElementById('ai-learning')?.checked || true
+    };
+    
+    localStorage.setItem('chat_settings', JSON.stringify(settings));
+    showNotification('تنظیمات ذخیره شد', 'success');
+    closeModal();
+}
+
+// بارگیری تنظیمات
+function loadSettings() {
+    const saved = localStorage.getItem('chat_settings');
+    if (saved) {
+        const settings = JSON.parse(saved);
+        // اعمال تنظیمات
+        document.body.classList.toggle('compact-mode', settings.compactMode);
+        document.body.classList.toggle('hide-avatars', !settings.showAvatars);
+        document.body.classList.toggle('hide-timestamps', !settings.showTimestamps);
+    }
+}
+
+// بارگیری تم
+function loadTheme() {
+    const theme = localStorage.getItem('chat_theme') || 'default';
+    document.body.setAttribute('data-theme', theme);
+}
+
+// بارگیری نام نمایشی
+function loadProfile() {
+    const name = localStorage.getItem('user_display_name');
+    if (name) {
+        document.getElementById('profile-name').textContent = name;
+    }
+}
+
+// مقداردهی اولیه
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+    loadTheme();
+    loadProfile();
+    
+    // بارگیری وضعیت سایدبار
+    const sidebarExpanded = localStorage.getItem('sidebar_expanded') !== 'false';
+    if (!sidebarExpanded) {
+        toggleSidebar();
+    }
+    
+    // آپدیت نشان پشتیبانی
+    updateSupportBadge();
+    
+    console.log('Sidebar initialized');
+});
+
+// آپدیت نشان پشتیبانی
+async function updateSupportBadge() {
+    try {
+        const response = await fetch('/api/get_support_messages');
+        const data = await response.json();
+        const unreadCount = data.unread || 0;
+        
+        const badge = document.getElementById('support-badge');
+        if (badge) {
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('Error updating support badge:', error);
+    }
+}
+</script>
+
+<style>
+/* استایل‌های سایدبار */
+.sidebar {
+    transition: all 0.3s ease;
+    width: 280px;
+    min-width: 280px;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+    min-width: 80px;
+}
+
+.sidebar.collapsed .sidebar-content {
+    padding: 20px 15px;
+}
+
+.sidebar.collapsed .logo h2,
+.sidebar.collapsed .menu-section h3,
+.sidebar.collapsed .profile-info,
+.sidebar.collapsed .menu-item span,
+.sidebar.collapsed .menu-badge,
+.sidebar.collapsed .status-item span,
+.sidebar.collapsed .logout-btn span {
+    display: none;
+}
+
+.sidebar.collapsed .menu-item,
+.sidebar.collapsed .logout-btn {
+    justify-content: center;
+    padding: 15px;
+}
+
+.sidebar.collapsed .menu-item i,
+.sidebar.collapsed .logout-btn i {
+    margin: 0;
+    font-size: 20px;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-toggle {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.version {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 5px;
+}
+
+.sidebar-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 100px);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.user-profile:hover {
+    background: rgba(67, 97, 238, 0.1);
+    transform: translateY(-2px);
+}
+
+.profile-avatar {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.profile-avatar i {
+    font-size: 60px;
+    color: #4361ee;
+}
+
+.online-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    background: #4cc9f0;
+    border: 3px solid #1a1a2e;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #4cc9f0;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.profile-id {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 3px 8px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.sidebar-menu {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 30px;
+}
+
+.menu-section {
+    margin-bottom: 30px;
+}
+
+.menu-section h3 {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 15px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: white;
+    text-align: right;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(67, 97, 238, 0.1);
+    border-color: rgba(67, 97, 238, 0.3);
+    transform: translateX(-5px);
+}
+
+.menu-item.active {
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(58, 12, 163, 0.2));
+    border-color: #4361ee;
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+}
+
+.menu-badge {
+    position: absolute;
+    left: 15px;
+    background: #f72585;
+    color: white;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.system-status {
+    margin-bottom: 20px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.status-item i {
+    color: #4cc9f0;
+    width: 20px;
+    text-align: center;
+}
+
+.status-online {
+    color: #4cc9f0;
+    font-weight: bold;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 15px;
+    background: rgba(247, 37, 133, 0.1);
+    border: 1px solid rgba(247, 37, 133, 0.3);
+    border-radius: 12px;
+    color: #f72585;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.logout-btn:hover {
+    background: rgba(247, 37, 133, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(247, 37, 133, 0.2);
+}
+
+/* استایل‌های مودال */
+.modal-content {
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.settings-group {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-group h4 {
+    color: #4361ee;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.setting-item {
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.setting-item label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.setting-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.setting-item select {
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    min-width: 150px;
+}
+
+.themes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.theme-item {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.theme-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+}
+
+.theme-item:hover .theme-preview {
+    transform: scale(1.05);
+    border-color: #4361ee;
+}
+
+.theme-name {
+    text-align: center;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.about-content {
+    text-align: center;
+}
+
+.about-logo {
+    font-size: 64px;
+    color: #4361ee;
+    margin-bottom: 20px;
+}
+
+.about-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(67, 97, 238, 0.1);
+    border-radius: 10px;
+}
+
+.feature i {
+    color: #4361ee;
+    font-size: 20px;
+}
+
+.about-info {
+    text-align: right;
+    margin-top: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+}
+
+.help-content {
+    text-align: right;
+}
+
+.help-section {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-section:last-child {
+    border-bottom: none;
+}
+
+.help-section h4 {
+    color: #4361ee;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.help-section ul {
+    list-style-type: none;
+    padding-right: 20px;
+}
+
+.help-section li {
+    margin: 10px 0;
+    padding-right: 10px;
+    position: relative;
+}
+
+.help-section li:before {
+    content: '•';
+    color: #4361ee;
+    font-size: 20px;
+    position: absolute;
+    right: -15px;
+    top: -5px;
+}
+
+.shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.shortcut-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shortcut-key kbd {
+    background: rgba(67, 97, 238, 0.2);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 16px;
+    border: 1px solid rgba(67, 97, 238, 0.3);
+}
+
+.shortcut-desc {
+    margin-top: 10px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+/* انیمیشن‌های سایدبار */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.sidebar {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+/* رسپانسیو */
+@media (max-width: 768px) {
+    .sidebar:not(.collapsed) {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    }
+    
+    .sidebar.collapsed {
+        display: none;
+    }
+    
+    .sidebar-toggle {
+        display: flex;
+    }
+}
+</style>

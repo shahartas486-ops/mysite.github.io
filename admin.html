@@ -1,0 +1,937 @@
+{% extends "base.html" %}
+
+{% block title %}پنل مدیریت - چت هوش مصنوعی{% endblock %}
+
+{% block content %}
+<div class="bg-animation">
+    <div class="float-element"></div>
+    <div class="float-element"></div>
+    <div class="float-element"></div>
+</div>
+
+<div class="admin-container">
+    <div class="admin-sidebar">
+        <div class="admin-header">
+            <h2><i class="fas fa-user-shield"></i> پنل مدیریت</h2>
+            <button class="refresh-btn" onclick="refreshUsers()" title="بروزرسانی لیست کاربران">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        
+        <div class="admin-stats" style="
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        ">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.6);">کاربران آنلاین</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #4cc9f0;" id="online-count">0</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.6);">کل پیام‌ها</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #f72585;" id="total-messages">0</div>
+                </div>
+            </div>
+            <div style="font-size: 12px; color: rgba(255,255,255,0.6); text-align: center;">
+                <i class="fas fa-clock"></i>
+                آخرین بروزرسانی: <span id="last-update">همین الان</span>
+            </div>
+        </div>
+        
+        <div class="users-list-header" style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        ">
+            <h3 style="color: white; font-size: 18px;">
+                <i class="fas fa-users"></i> کاربران
+            </h3>
+            <div class="user-search" style="position: relative;">
+                <input type="text" id="user-search" placeholder="جستجوی کاربر..." style="
+                    width: 100%;
+                    padding: 10px 35px 10px 15px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 8px;
+                    color: white;
+                    font-size: 14px;
+                ">
+                <i class="fas fa-search" style="
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: rgba(255,255,255,0.5);
+                "></i>
+            </div>
+        </div>
+        
+        <div class="users-list" id="users-list" style="
+            max-height: calc(100vh - 350px);
+            overflow-y: auto;
+            padding-right: 5px;
+        ">
+            <!-- لیست کاربران اینجا نمایش داده می‌شود -->
+            <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 15px;"></i>
+                <div>در حال بارگذاری کاربران...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="admin-main">
+        <div class="admin-chat-header" style="
+            padding: 20px 30px;
+            background: linear-gradient(90deg, #9b59b6, #8e44ad);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        ">
+            <div>
+                <h3 id="selected-user" style="margin-bottom: 5px; font-size: 20px;">
+                    <i class="fas fa-user"></i> انتخاب کاربر
+                </h3>
+                <div id="user-info" style="font-size: 14px; opacity: 0.8;">
+                    یک کاربر از لیست سمت راست انتخاب کنید
+                </div>
+            </div>
+            
+            <div class="admin-actions" style="display: flex; gap: 10px;">
+                <button class="tool-btn" onclick="exportChat()" title="خروجی چت">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="tool-btn" onclick="clearAdminChat()" title="پاک کردن چت">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="tool-btn" onclick="blockUser()" title="مسدود کردن کاربر">
+                    <i class="fas fa-ban"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="admin-chat-container" style="
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            background: rgba(255,255,255,0.02);
+        ">
+            <div class="admin-messages" id="admin-messages" style="
+                flex: 1;
+                overflow-y: auto;
+                padding: 25px;
+                margin-bottom: 25px;
+                background: rgba(255,255,255,0.02);
+                border-radius: 20px;
+                border: 1px solid rgba(255,255,255,0.05);
+            ">
+                <!-- پیام‌های چت اینجا نمایش داده می‌شوند -->
+                <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4);">
+                    <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <div style="font-size: 18px; margin-bottom: 10px;">چت مدیریت</div>
+                    <div style="font-size: 14px;">برای شروع چت، یک کاربر از لیست سمت راست انتخاب کنید</div>
+                </div>
+            </div>
+            
+            <div class="admin-input" style="
+                background: rgba(255,255,255,0.03);
+                padding: 20px;
+                border-radius: 20px;
+                border: 1px solid rgba(255,255,255,0.1);
+            ">
+                <div class="admin-tools" style="
+                    display: flex;
+                    gap: 12px;
+                    margin-bottom: 15px;
+                ">
+                    <button class="tool-btn" onclick="toggleAdminFileInput()" title="ارسال فایل">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <button class="tool-btn" onclick="insertAdminLatex()" title="فرمول ریاضی">
+                        <i class="fas fa-square-root-alt"></i>
+                    </button>
+                    <button class="tool-btn" onclick="insertTemplate()" title="قالب پاسخ">
+                        <i class="fas fa-sticky-note"></i>
+                    </button>
+                    <button class="tool-btn" onclick="toggleQuickReplies()" title="پاسخ‌های سریع">
+                        <i class="fas fa-reply-all"></i>
+                    </button>
+                </div>
+                
+                <div class="admin-file-input" id="admin-file-input" style="
+                    display: none;
+                    background: rgba(255,255,255,0.05);
+                    padding: 20px;
+                    border-radius: 15px;
+                    margin-bottom: 20px;
+                    border: 2px dashed #9b59b6;
+                    text-align: center;
+                ">
+                    <label class="file-label" style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 15px;
+                        cursor: pointer;
+                        color: #9b59b6;
+                        padding: 20px;
+                    ">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px;"></i>
+                        <span>فایل خود را اینجا رها کنید یا کلیک کنید</span>
+                        <input type="file" id="admin-file-upload" multiple accept="image/*,video/*,audio/*,.pdf,.txt">
+                    </label>
+                    <select id="admin-file-type" style="
+                        width: 100%;
+                        padding: 10px;
+                        background: rgba(26, 26, 46, 0.8);
+                        border: 1px solid #9b59b6;
+                        border-radius: 10px;
+                        color: white;
+                        margin-top: 10px;
+                    ">
+                        <option value="image">تصویر</option>
+                        <option value="video">ویدیو</option>
+                        <option value="audio">صدا</option>
+                        <option value="file">فایل</option>
+                    </select>
+                </div>
+                
+                <textarea id="admin-message-input" placeholder="پاسخ خود را بنویسید..." rows="4" style="
+                    width: 100%;
+                    padding: 18px;
+                    background: rgba(255,255,255,0.05);
+                    border: 2px solid rgba(255,255,255,0.1);
+                    border-radius: 15px;
+                    resize: none;
+                    font-size: 16px;
+                    color: white;
+                    margin-bottom: 15px;
+                    transition: all 0.3s;
+                " onfocus="this.style.borderColor='#9b59b6'; this.style.background='rgba(255,255,255,0.08)'"
+                  onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'"></textarea>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button onclick="sendAdminMessage()" style="
+                        flex: 1;
+                        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+                        color: white;
+                        border: none;
+                        padding: 18px;
+                        border-radius: 15px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: bold;
+                        transition: all 0.3s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(155, 89, 182, 0.4)'"
+                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fas fa-paper-plane"></i>
+                        ارسال پاسخ
+                    </button>
+                    
+                    <button onclick="saveAsTemplate()" style="
+                        background: transparent;
+                        color: white;
+                        border: 1px solid rgba(255,255,255,0.3);
+                        padding: 18px;
+                        border-radius: 15px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: all 0.3s;
+                        width: 60px;
+                    " title="ذخیره به عنوان قالب">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="current-user-id">
+
+<!-- Modal LaTeX ادمین -->
+<div class="modal" id="admin-latex-modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-square-root-alt"></i> ورود فرمول LaTeX</h3>
+        <textarea id="admin-latex-input" placeholder="مثال: \frac{a}{b} = \sqrt{c^2}" rows="5"></textarea>
+        <div class="modal-buttons">
+            <button class="modal-btn insert" onclick="insertAdminLatexText()">
+                <i class="fas fa-plus"></i> درج
+            </button>
+            <button class="modal-btn cancel" onclick="closeAdminLatexModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal پاسخ‌های سریع -->
+<div class="modal" id="quick-replies-modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <h3><i class="fas fa-reply-all"></i> پاسخ‌های سریع</h3>
+        <div id="quick-replies-list" style="
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        ">
+            <!-- پاسخ‌های سریع اینجا نمایش داده می‌شوند -->
+        </div>
+        <div class="modal-buttons">
+            <button class="modal-btn insert" onclick="addQuickReply()">
+                <i class="fas fa-plus"></i> افزودن پاسخ
+            </button>
+            <button class="modal-btn cancel" onclick="closeQuickReplies()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="watermark">Admin Panel v2.0</div>
+
+<script>
+// توابع مدیریت پنل ادمین
+let currentUserId = null;
+let adminMessageInterval = null;
+let quickReplies = JSON.parse(localStorage.getItem('admin_quick_replies') || '[]');
+
+// بارگذاری کاربران
+async function refreshUsers() {
+    try {
+        const response = await fetch('/api/get_users');
+        const data = await response.json();
+        
+        const usersList = document.getElementById('users-list');
+        usersList.innerHTML = '';
+        
+        let onlineCount = 0;
+        let totalMessages = 0;
+        
+        data.users.forEach(user => {
+            const userDiv = document.createElement('div');
+            userDiv.className = 'user-item';
+            userDiv.onclick = () => selectUser(user.id, user.username, user.session_id);
+            
+            // بررسی فعالیت اخیر (کمتر از 5 دقیقه)
+            const isOnline = user.last_activity && 
+                (new Date() - new Date(user.last_activity)) < 5 * 60 * 1000;
+            
+            if (isOnline) onlineCount++;
+            totalMessages += user.message_count || 0;
+            
+            const lastActivity = user.last_activity ? 
+                formatDate(user.last_activity) : 'بدون فعالیت';
+            
+            userDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <div class="user-name" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            margin-bottom: 5px;
+                        ">
+                            <i class="fas fa-user" style="color: ${isOnline ? '#4cc9f0' : 'rgba(255,255,255,0.5)'}"></i>
+                            ${user.username}
+                            ${isOnline ? '<span class="status-indicator status-online"></span>' : ''}
+                        </div>
+                        <div class="user-last">
+                            <i class="fas fa-clock"></i>
+                            ${lastActivity}
+                        </div>
+                        <div class="user-count">
+                            <i class="fas fa-comment"></i>
+                            ${user.message_count || 0} پیام
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.5); font-family: monospace;">
+                        ${user.session_id ? user.session_id.substring(0, 8) + '...' : ''}
+                    </div>
+                </div>
+            `;
+            
+            usersList.appendChild(userDiv);
+        });
+        
+        // آپدیت آمار
+        document.getElementById('online-count').textContent = onlineCount;
+        document.getElementById('total-messages').textContent = totalMessages;
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString('fa-IR');
+        
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showNotification('خطا در بارگذاری کاربران', 'error');
+    }
+}
+
+// انتخاب کاربر
+function selectUser(userId, username, sessionId) {
+    currentUserId = userId;
+    document.getElementById('current-user-id').value = userId;
+    
+    document.getElementById('selected-user').innerHTML = `
+        <i class="fas fa-user"></i> ${username}
+    `;
+    
+    document.getElementById('user-info').innerHTML = `
+        <div style="display: flex; gap: 15px; font-size: 13px;">
+            <span><i class="fas fa-id-card"></i> ${sessionId ? sessionId.substring(0, 8) + '...' : 'N/A'}</span>
+            <span><i class="fas fa-calendar"></i> ${new Date().toLocaleDateString('fa-IR')}</span>
+        </div>
+    `;
+    
+    // هایلایت کاربر انتخاب شده
+    document.querySelectorAll('.user-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.closest('.user-item').classList.add('active');
+    
+    // بارگذاری پیام‌های کاربر
+    loadAdminMessages();
+    
+    // پاک کردن اینتروال قبلی و تنظیم جدید
+    clearInterval(adminMessageInterval);
+    adminMessageInterval = setInterval(loadAdminMessages, 2000);
+}
+
+// بارگذاری پیام‌های ادمین
+async function loadAdminMessages() {
+    if (!currentUserId) return;
+    
+    try {
+        const response = await fetch(`/api/get_messages?user_id=${currentUserId}`);
+        const data = await response.json();
+        
+        const messagesDiv = document.getElementById('admin-messages');
+        messagesDiv.innerHTML = '';
+        
+        if (data.messages.length === 0) {
+            messagesDiv.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4);">
+                    <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <div style="font-size: 18px; margin-bottom: 10px;">هیچ پیامی یافت نشد</div>
+                    <div style="font-size: 14px;">اولین پیام را ارسال کنید</div>
+                </div>
+            `;
+            return;
+        }
+        
+        data.messages.forEach(msg => {
+            addMessageToAdminChat(msg.sender, msg.content, msg.file_path, msg.timestamp);
+        });
+        
+    } catch (error) {
+        console.error('Error loading admin messages:', error);
+    }
+}
+
+// افزودن پیام به چت ادمین
+function addMessageToAdminChat(sender, content, filePath = null, timestamp = null) {
+    const messagesDiv = document.getElementById('admin-messages');
+    
+    // اگر پیام خالی است، ایجاد نکن
+    if (!content && !filePath) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    let messageContent = '';
+    let fileContent = '';
+    
+    if (filePath) {
+        const fileType = filePath.split('.').pop().toLowerCase();
+        const fileUrl = `/uploads/${filePath}`;
+        
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileType)) {
+            fileContent = `<div class="message-file"><img src="${fileUrl}" class="file-preview" onclick="openFile('${fileUrl}')"></div>`;
+        } else if (['mp4', 'avi', 'mov', 'webm'].includes(fileType)) {
+            fileContent = `<div class="message-file"><video controls class="file-preview"><source src="${fileUrl}" type="video/mp4"></video></div>`;
+        } else if (['mp3', 'wav', 'ogg'].includes(fileType)) {
+            fileContent = `<div class="message-file"><audio controls><source src="${fileUrl}"></audio></div>`;
+        } else {
+            fileContent = `<div class="message-file"><a href="${fileUrl}" download class="file-download"><i class="fas fa-download"></i> دانلود فایل</a></div>`;
+        }
+    }
+    
+    if (content) {
+        messageContent = `<div class="message-content">${content}</div>`;
+    }
+    
+    const time = timestamp ? new Date(timestamp).toLocaleTimeString('fa-IR') : new Date().toLocaleTimeString('fa-IR');
+    
+    messageDiv.innerHTML = `
+        ${messageContent}
+        ${fileContent}
+        <div class="message-time">${time}</div>
+        <div class="message-actions" style="
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: none;
+            gap: 5px;
+        ">
+            <button onclick="copyMessage('${content.replace(/'/g, "\\'")}')" style="
+                background: rgba(0,0,0,0.5);
+                border: none;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 12px;
+            " title="کپی">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button onclick="deleteMessage(${messageDiv.dataset.id})" style="
+                background: rgba(247, 37, 133, 0.5);
+                border: none;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 12px;
+            " title="حذف">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    
+    messageDiv.onmouseenter = () => {
+        messageDiv.querySelector('.message-actions').style.display = 'flex';
+    };
+    
+    messageDiv.onmouseleave = () => {
+        messageDiv.querySelector('.message-actions').style.display = 'none';
+    };
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    
+    // رندر LaTeX
+    if (window.MathJax) {
+        MathJax.typesetPromise([messageDiv]);
+    }
+}
+
+// ارسال پیام ادمین
+async function sendAdminMessage() {
+    if (!currentUserId) {
+        showNotification('لطفا کاربری را انتخاب کنید', 'warning');
+        return;
+    }
+    
+    const input = document.getElementById('admin-message-input');
+    const message = input.value.trim();
+    
+    if (!message && !document.getElementById('admin-file-upload').files.length) {
+        showNotification('لطفا پیام یا فایل وارد کنید', 'warning');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('user_id', currentUserId);
+    formData.append('message_type', 'text');
+    formData.append('content', message);
+    
+    // فایل آپلود شده
+    const fileInput = document.getElementById('admin-file-upload');
+    if (fileInput.files.length > 0) {
+        const fileType = document.getElementById('admin-file-type').value;
+        formData.append('message_type', fileType);
+        
+        for (let i = 0; i < fileInput.files.length; i++) {
+            formData.append('file', fileInput.files[i]);
+        }
+        
+        fileInput.value = '';
+        document.getElementById('admin-file-input').style.display = 'none';
+    }
+    
+    try {
+        const response = await fetch('/api/admin/send', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            input.value = '';
+            loadAdminMessages();
+            showNotification('پیام با موفقیت ارسال شد', 'success');
+        } else {
+            showNotification('خطا در ارسال پیام', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('خطا در ارسال پیام', 'error');
+    }
+}
+
+// کپی پیام
+function copyMessage(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('پیام کپی شد', 'success');
+    });
+}
+
+// حذف پیام
+function deleteMessage(messageId) {
+    if (confirm('آیا از حذف این پیام اطمینان دارید؟')) {
+        // اینجا باید API حذف پیام را فراخوانی کنید
+        showNotification('پیام حذف شد', 'success');
+    }
+}
+
+// مدیریت فایل‌های ادمین
+function toggleAdminFileInput() {
+    const fileInput = document.getElementById('admin-file-input');
+    fileInput.style.display = fileInput.style.display === 'none' ? 'block' : 'none';
+}
+
+// خروجی گرفتن از چت
+function exportChat() {
+    if (!currentUserId) {
+        showNotification('لطفا کاربری را انتخاب کنید', 'warning');
+        return;
+    }
+    
+    // ایجاد فایل خروجی
+    const chatContent = collectChatContent();
+    const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat_export_${currentUserId}_${Date.now()}.txt`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+    showNotification('چت با موفقیت ذخیره شد', 'success');
+}
+
+function collectChatContent() {
+    const messages = document.querySelectorAll('#admin-messages .message');
+    let content = 'چت اکسپورت\n';
+    content += 'تاریخ: ' + new Date().toLocaleString('fa-IR') + '\n';
+    content += '='.repeat(50) + '\n\n';
+    
+    messages.forEach(msg => {
+        const sender = msg.classList.contains('user-message') ? 'کاربر' : 
+                      msg.classList.contains('admin-message') ? 'مدیر' : 'سیستم';
+        const text = msg.querySelector('.message-content')?.textContent || '';
+        const time = msg.querySelector('.message-time')?.textContent || '';
+        
+        content += `[${time}] ${sender}: ${text}\n`;
+    });
+    
+    return content;
+}
+
+// پاک کردن چت ادمین
+function clearAdminChat() {
+    if (confirm('آیا از پاک کردن تمام پیام‌های این چت اطمینان دارید؟')) {
+        const messagesDiv = document.getElementById('admin-messages');
+        if (messagesDiv) {
+            messagesDiv.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4);">
+                    <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <div style="font-size: 18px; margin-bottom: 10px;">چت پاک شد</div>
+                    <div style="font-size: 14px;">پیام جدیدی ارسال کنید</div>
+                </div>
+            `;
+            showNotification('چت با موفقیت پاک شد', 'success');
+        }
+    }
+}
+
+// مسدود کردن کاربر
+function blockUser() {
+    if (!currentUserId) {
+        showNotification('لطفا کاربری را انتخاب کنید', 'warning');
+        return;
+    }
+    
+    if (confirm('آیا از مسدود کردن این کاربر اطمینان دارید؟')) {
+        // اینجا باید API مسدود کردن کاربر را فراخوانی کنید
+        showNotification('کاربر مسدود شد', 'success');
+    }
+}
+
+// مدیریت پاسخ‌های سریع
+function toggleQuickReplies() {
+    document.getElementById('quick-replies-modal').style.display = 'flex';
+    loadQuickReplies();
+}
+
+function closeQuickReplies() {
+    document.getElementById('quick-replies-modal').style.display = 'none';
+}
+
+function loadQuickReplies() {
+    const listDiv = document.getElementById('quick-replies-list');
+    listDiv.innerHTML = '';
+    
+    if (quickReplies.length === 0) {
+        listDiv.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5);">
+                <i class="fas fa-sticky-note" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <div>هیچ پاسخی ذخیره نشده است</div>
+            </div>
+        `;
+        return;
+    }
+    
+    quickReplies.forEach((reply, index) => {
+        const replyDiv = document.createElement('div');
+        replyDiv.className = 'quick-reply-item';
+        replyDiv.style.cssText = `
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        `;
+        
+        replyDiv.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 8px; color: #9b59b6;">
+                ${reply.title || 'پاسخ سریع'}
+            </div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 10px;">
+                ${reply.content.substring(0, 100)}${reply.content.length > 100 ? '...' : ''}
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5);">
+                <button onclick="useQuickReply(${index})" style="
+                    background: #9b59b6;
+                    color: white;
+                    border: none;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 11px;
+                ">
+                    <i class="fas fa-paper-plane"></i> استفاده
+                </button>
+                <button onclick="deleteQuickReply(${index})" style="
+                    background: transparent;
+                    color: #f72585;
+                    border: none;
+                    cursor: pointer;
+                ">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        replyDiv.onmouseenter = () => {
+            replyDiv.style.background = 'rgba(155, 89, 182, 0.1)';
+            replyDiv.style.transform = 'translateY(-2px)';
+        };
+        
+        replyDiv.onmouseleave = () => {
+            replyDiv.style.background = 'rgba(255,255,255,0.05)';
+            replyDiv.style.transform = 'translateY(0)';
+        };
+        
+        listDiv.appendChild(replyDiv);
+    });
+}
+
+function addQuickReply() {
+    const content = prompt('محتوای پاسخ سریع را وارد کنید:');
+    if (content) {
+        const title = prompt('عنوان پاسخ را وارد کنید (اختیاری):', 'پاسخ سریع');
+        quickReplies.push({
+            title: title || 'پاسخ سریع',
+            content: content,
+            created: new Date().toISOString()
+        });
+        
+        localStorage.setItem('admin_quick_replies', JSON.stringify(quickReplies));
+        loadQuickReplies();
+        showNotification('پاسخ سریع افزوده شد', 'success');
+    }
+}
+
+function useQuickReply(index) {
+    const reply = quickReplies[index];
+    const input = document.getElementById('admin-message-input');
+    if (input) {
+        input.value = reply.content;
+        input.focus();
+        closeQuickReplies();
+    }
+}
+
+function deleteQuickReply(index) {
+    if (confirm('آیا از حذف این پاسخ سریع اطمینان دارید؟')) {
+        quickReplies.splice(index, 1);
+        localStorage.setItem('admin_quick_replies', JSON.stringify(quickReplies));
+        loadQuickReplies();
+        showNotification('پاسخ سریع حذف شد', 'success');
+    }
+}
+
+function saveAsTemplate() {
+    const input = document.getElementById('admin-message-input');
+    const content = input.value.trim();
+    
+    if (content) {
+        addQuickReply();
+    } else {
+        showNotification('لطفا متنی برای ذخیره وارد کنید', 'warning');
+    }
+}
+
+function insertTemplate() {
+    // نمایش لیست قالب‌ها
+    const templates = [
+        { title: 'سلام و احوالپرسی', content: 'سلام! چطور می‌تونم کمکتون کنم؟ 😊' },
+        { title: 'تشکر', content: 'خواهش می‌کنم! خوشحالم که می‌تونم کمک کنم. 🤗' },
+        { title: 'منتظر بمانید', content: 'لطفاً کمی صبر کنید، در حال بررسی سوال شما هستم... 🔄' },
+        { title: 'پایان چت', content: 'ممنون از شما! اگر سوال دیگه‌ای دارید، در خدمتم. 👋' },
+        { title: 'دریافت اطلاعات', content: 'لطفاً اطلاعات بیشتری در این مورد ارائه دهید.' }
+    ];
+    
+    const templateList = templates.map((t, i) => 
+        `<option value="${i}">${t.title}</option>`
+    ).join('');
+    
+    const selected = prompt(
+        'قالب مورد نظر را انتخاب کنید:\n' + 
+        templates.map((t, i) => `${i+1}. ${t.title}`).join('\n') + 
+        '\n\nشماره قالب را وارد کنید:'
+    );
+    
+    if (selected && templates[selected - 1]) {
+        const template = templates[selected - 1];
+        const input = document.getElementById('admin-message-input');
+        if (input) {
+            input.value = template.content;
+            input.focus();
+        }
+    }
+}
+
+// جستجوی کاربر
+document.getElementById('user-search')?.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const userItems = document.querySelectorAll('.user-item');
+    
+    userItems.forEach(item => {
+        const username = item.querySelector('.user-name').textContent.toLowerCase();
+        if (username.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// مقداردهی اولیه
+document.addEventListener('DOMContentLoaded', function() {
+    // بارگذاری اولیه کاربران
+    refreshUsers();
+    adminMessageInterval = setInterval(refreshUsers, 5000);
+    
+    // مدیریت Enter برای ارسال پیام
+    const adminMessageInput = document.getElementById('admin-message-input');
+    if (adminMessageInput) {
+        adminMessageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendAdminMessage();
+            }
+        });
+    }
+    
+    // ایجاد ربات انیمیشن برای ادمین
+    createAdminBotAnimation();
+});
+
+// ایجاد انیمیشن ربات برای ادمین
+function createAdminBotAnimation() {
+    const botDiv = document.createElement('div');
+    botDiv.className = 'bot-animation';
+    botDiv.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 80px;
+        height: 80px;
+        z-index: 100;
+        pointer-events: none;
+    `;
+    
+    botDiv.innerHTML = `
+        <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="#9b59b6" opacity="0.8"/>
+            <circle cx="40" cy="40" r="5" fill="white"/>
+            <circle cx="60" cy="40" r="5" fill="white"/>
+            <path d="M35,65 Q50,75 65,65" stroke="white" stroke-width="3" fill="none"/>
+            <path d="M30,20 Q50,10 70,20" stroke="white" stroke-width="2" fill="none"/>
+            <path d="M45,85 Q50,90 55,85" stroke="white" stroke-width="2" fill="none"/>
+        </svg>
+    `;
+    
+    document.body.appendChild(botDiv);
+}
+
+console.log('Admin panel initialized');
+</script>
+
+<style>
+/* استایل‌های اضافی برای پنل ادمین */
+.admin-stats {
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(76, 201, 240, 0.1));
+}
+
+.user-item {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.user-item:hover {
+    border-color: #4361ee;
+    transform: translateX(-5px);
+}
+
+.user-item.active {
+    border-color: #9b59b6;
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(142, 68, 173, 0.1));
+}
+
+.quick-reply-item:hover {
+    background: rgba(155, 89, 182, 0.1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 15px rgba(155, 89, 182, 0.2) !important;
+}
+
+.admin-actions .tool-btn:hover {
+    background: #9b59b6;
+    transform: scale(1.1);
+}
+
+#admin-message-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.2);
+}
+</style>
+{% endblock %}

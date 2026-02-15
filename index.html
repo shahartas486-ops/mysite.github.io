@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}چت هوش مصنوعی{% endblock %}
+
+{% block content %}
+<div class="bg-animation">
+    <div class="float-element"></div>
+    <div class="float-element"></div>
+    <div class="float-element"></div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">
+            <h2><i class="fas fa-robot"></i> AI Chat</h2>
+        </div>
+        
+        <div class="menu">
+            <button class="menu-btn active" onclick="switchChat('ai')">
+                <i class="fas fa-brain"></i>
+                <span>هوش مصنوعی</span>
+            </button>
+            <button class="menu-btn" onclick="switchChat('admin')">
+                <i class="fas fa-headset"></i>
+                <span>پشتیبانی</span>
+            </button>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-id">
+                <i class="fas fa-id-card"></i>
+                شناسه: {{ session_id[:8] }}
+            </div>
+            <div class="user-stats">
+                <div class="stat">
+                    <i class="fas fa-clock"></i>
+                    <span>آنلاین</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="chat-header">
+            <h2 id="chat-title">دستیار هوش مصنوعی</h2>
+            <div class="ai-animation" id="ai-animation">
+                <div class="ai-dots">
+                    <div class="ai-dot"></div>
+                    <div class="ai-dot"></div>
+                    <div class="ai-dot"></div>
+                    <div class="ai-dot"></div>
+                </div>
+                <span>آنلاین</span>
+                <span class="status-indicator status-online"></span>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <!-- پیام‌ها اینجا نمایش داده می‌شوند -->
+            </div>
+            
+            <div class="message-input">
+                <div class="input-tools">
+                    <button class="tool-btn" onclick="toggleFileInput()" data-tooltip="ارسال فایل">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <button class="tool-btn" onclick="insertLatex()" data-tooltip="فرمول ریاضی">
+                        <i class="fas fa-square-root-alt"></i>
+                    </button>
+                    <button class="tool-btn" onclick="recordAudio()" data-tooltip="ضبط صدا">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="tool-btn" onclick="clearChat()" data-tooltip="پاک کردن چت">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="file-input" id="file-input" style="display: none;">
+                    <label class="file-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>فایل خود را اینجا رها کنید یا کلیک کنید</span>
+                        <input type="file" id="file-upload" multiple accept="image/*,video/*,audio/*,.pdf,.txt">
+                    </label>
+                    <select id="file-type" class="file-type-select">
+                        <option value="image">تصویر</option>
+                        <option value="video">ویدیو</option>
+                        <option value="audio">صدا</option>
+                        <option value="file">فایل</option>
+                    </select>
+                </div>
+                
+                <div class="text-input">
+                    <textarea id="message-input" placeholder="پیام خود را بنویسید... برای فرمول‌های ریاضی از $...$ استفاده کنید" rows="3"></textarea>
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                        ارسال
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal LaTeX -->
+<div class="modal" id="latex-modal">
+    <div class="modal-content">
+        <h3>ورود فرمول LaTeX</h3>
+        <textarea id="latex-input" placeholder="مثال: \frac{a}{b} = \sqrt{c^2}" rows="5"></textarea>
+        <div class="modal-buttons">
+            <button class="modal-btn insert" onclick="insertLatexText()">
+                <i class="fas fa-plus"></i> درج
+            </button>
+            <button class="modal-btn cancel" onclick="closeLatexModal()">
+                <i class="fas fa-times"></i> بستن
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="watermark">AI Chat System v2.0</div>
+{% endblock %}
