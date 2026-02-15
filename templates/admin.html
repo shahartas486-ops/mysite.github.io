@@ -1,63 +1,463 @@
 {% extends "base.html" %}
 
-{% block title %}پنل مدیریت - چت هوشمند{% endblock %}
+{% block title %}پنل مدیریت - موبایل{% endblock %}
 
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Vazir', 'Tahoma', sans-serif;
+    }
+    
+    body {
+        background: #f0f2f5;
+        direction: rtl;
+    }
+    
+    .admin-panel {
+        padding: 10px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    
+    /* هدر موبایل */
+    .mobile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    .mobile-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    
+    .stats-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(5px);
+    }
+    
+    /* منوی پایین برای جابجایی بین بخش‌ها */
+    .bottom-nav {
+        display: flex;
+        background: white;
+        border-radius: 30px;
+        margin-bottom: 15px;
+        padding: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-item {
+        flex: 1;
+        text-align: center;
+        padding: 12px 0;
+        font-size: 0.9rem;
+        border-radius: 25px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+        font-weight: bold;
+    }
+    
+    /* بخش کاربران (موبایل) */
+    .users-section {
+        background: white;
+        border-radius: 20px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        display: none;
+    }
+    
+    .users-section.active {
+        display: block;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .section-header h2 {
+        font-size: 1.2rem;
+        color: #333;
+    }
+    
+    .refresh-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    
+    /* لیست کاربران به صورت کارتی */
+    .users-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .user-card {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    
+    .user-card:active {
+        transform: scale(0.98);
+        background: #e9ecef;
+    }
+    
+    .user-card.active {
+        border-color: #667eea;
+        background: #f0f2ff;
+    }
+    
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-left: 12px;
+    }
+    
+    .user-info {
+        flex: 1;
+    }
+    
+    .user-name {
+        font-weight: bold;
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+    
+    .user-meta {
+        display: flex;
+        gap: 10px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    /* بخش چت */
+    .chat-section {
+        background: white;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 60vh;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        display: none;
+    }
+    
+    .chat-section.active {
+        display: flex;
+    }
+    
+    .chat-header {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 20px 20px 0 0;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .back-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #667eea;
+        cursor: pointer;
+        padding: 5px;
+    }
+    
+    .selected-user-info {
+        flex: 1;
+    }
+    
+    .selected-user-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .selected-user-status {
+        font-size: 0.8rem;
+        color: #28a745;
+    }
+    
+    /* محفظه پیام‌ها */
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .message {
+        max-width: 85%;
+        padding: 10px 12px;
+        border-radius: 18px;
+        position: relative;
+        word-wrap: break-word;
+    }
+    
+    .message.user {
+        align-self: flex-end;
+        background: #667eea;
+        color: white;
+        border-bottom-left-radius: 4px;
+    }
+    
+    .message.ai, .message.admin {
+        align-self: flex-start;
+        background: #f1f3f5;
+        color: #333;
+        border-bottom-right-radius: 4px;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        margin-bottom: 4px;
+        opacity: 0.7;
+    }
+    
+    .message-content {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .message-image, .message-video {
+        max-width: 100%;
+        border-radius: 10px;
+        margin-top: 5px;
+    }
+    
+    .message-audio {
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    .message-file {
+        display: inline-block;
+        padding: 8px 12px;
+        background: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    /* فرم ارسال پیام */
+    .message-form {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 0 0 20px 20px;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .message-type-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+        overflow-x: auto;
+        padding: 5px 0;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .type-btn {
+        padding: 8px 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        background: white;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    
+    .type-btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .input-area {
+        margin-bottom: 10px;
+    }
+    
+    .text-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        font-size: 1rem;
+        resize: none;
+    }
+    
+    .file-input {
+        width: 100%;
+        padding: 10px;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        background: white;
+    }
+    
+    .file-preview {
+        margin-top: 10px;
+        max-width: 100%;
+    }
+    
+    .preview-image {
+        max-width: 100%;
+        max-height: 150px;
+        border-radius: 8px;
+    }
+    
+    .send-btn {
+        width: 100%;
+        padding: 15px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .send-btn:active {
+        transform: scale(0.98);
+        background: #218838;
+    }
+    
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 40px 20px;
+    }
+    
+    /* حالت خالی */
+    .no-user-selected {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #999;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .no-user-selected i {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.3;
+    }
+</style>
+
 <div class="admin-panel">
-    <div class="admin-header">
+    <!-- هدر موبایل -->
+    <div class="mobile-header">
         <h1>👨‍💼 پنل مدیریت</h1>
-        <div class="admin-stats" id="admin-stats"></div>
+        <span class="stats-badge" id="stats-badge">0 کاربر</span>
     </div>
     
-    <div class="admin-controls">
-        <!-- سایدبار کاربران -->
-        <div class="users-sidebar">
-            <div class="sidebar-header">
-                <h2>👥 کاربران آنلاین</h2>
-                <button onclick="refreshUsers()" class="refresh-btn">🔄</button>
+    <!-- منوی پایین -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showSection('users')">👥 کاربران</div>
+        <div class="nav-item" onclick="showSection('chat')">💬 چت</div>
+    </div>
+    
+    <!-- بخش کاربران -->
+    <div id="users-section" class="users-section active">
+        <div class="section-header">
+            <h2>لیست کاربران</h2>
+            <button class="refresh-btn" onclick="loadUsers()">🔄</button>
+        </div>
+        <div id="users-grid" class="users-grid">
+            <!-- کاربران با js اضافه میشن -->
+        </div>
+    </div>
+    
+    <!-- بخش چت -->
+    <div id="chat-section" class="chat-section">
+        <div class="chat-header">
+            <button class="back-btn" onclick="showSection('users')">←</button>
+            <div class="selected-user-info">
+                <div class="selected-user-name" id="selected-user-name">انتخاب کاربر</div>
+                <div class="selected-user-status" id="selected-user-status">کاربری انتخاب نشده</div>
             </div>
-            <div id="users-list" class="users-list"></div>
         </div>
         
-        <!-- بخش اصلی چت -->
-        <div class="chat-section">
-            <div class="chat-header" id="chat-header">
-                <h3>🔹 کاربری را انتخاب کنید</h3>
+        <div id="messages-container" class="messages-container">
+            <div class="no-user-selected">
+                <div>👈</div>
+                <div>یک کاربر را انتخاب کنید</div>
+            </div>
+        </div>
+        
+        <div class="message-form" id="message-form" style="display: none;">
+            <div class="message-type-row" id="message-type-row">
+                <button class="type-btn active" onclick="selectMessageType('text')">📝 متن</button>
+                <button class="type-btn" onclick="selectMessageType('image')">🖼️ عکس</button>
+                <button class="type-btn" onclick="selectMessageType('video')">🎥 ویدیو</button>
+                <button class="type-btn" onclick="selectMessageType('audio')">🎵 صدا</button>
+                <button class="type-btn" onclick="selectMessageType('file')">📁 فایل</button>
             </div>
             
-            <div id="messages-container" class="messages-container">
-                <div class="empty-state">
-                    برای مشاهده پیام‌ها، کاربری را انتخاب کنید
+            <div class="input-area">
+                <div id="text-input-container">
+                    <textarea id="message-text" class="text-input" placeholder="پیام خود را بنویسید..." rows="2"></textarea>
+                </div>
+                <div id="file-input-container" style="display: none;">
+                    <input type="file" id="message-file" class="file-input" accept="*/*">
+                    <div id="file-preview" class="file-preview"></div>
                 </div>
             </div>
             
-            <!-- فرم ارسال پیام ادمین -->
-            <div class="admin-message-form" id="message-form" style="display: none;">
-                <div class="message-type-selector">
-                    <select id="messageType">
-                        <option value="text">📝 متن</option>
-                        <option value="image">🖼️ عکس</option>
-                        <option value="video">🎥 ویدیو</option>
-                        <option value="audio">🎵 صدا</option>
-                        <option value="file">📁 فایل</option>
-                    </select>
-                </div>
-                
-                <div id="textInput" class="text-input active">
-                    <textarea id="messageText" placeholder="پیام خود را بنویسید..." rows="3"></textarea>
-                </div>
-                
-                <div id="fileInput" class="file-input">
-                    <input type="file" id="messageFile" accept="*/*">
-                    <div id="filePreview" class="file-preview"></div>
-                </div>
-                
-                <div class="form-actions">
-                    <button onclick="sendAdminMessage()" class="send-btn">
-                        📤 ارسال به کاربر
-                    </button>
-                </div>
-            </div>
+            <button class="send-btn" onclick="sendAdminMessage()">📤 ارسال به کاربر</button>
         </div>
     </div>
 </div>
@@ -65,111 +465,142 @@
 <script>
 const ADMIN_PASSWORD = 'admin123';
 let currentUserId = null;
+let currentUserName = '';
+let currentMessageType = 'text';
 let refreshInterval = null;
 
-// ==================== بارگذاری کاربران ====================
+// نمایش بخش‌ها
+function showSection(section) {
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.users-section, .chat-section').forEach(section => section.classList.remove('active'));
+    
+    if (section === 'users') {
+        document.querySelector('.nav-item:first-child').classList.add('active');
+        document.getElementById('users-section').classList.add('active');
+    } else {
+        document.querySelector('.nav-item:last-child').classList.add('active');
+        document.getElementById('chat-section').classList.add('active');
+    }
+}
+
+// انتخاب نوع پیام
+function selectMessageType(type) {
+    currentMessageType = type;
+    document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (type === 'text') {
+        document.getElementById('text-input-container').style.display = 'block';
+        document.getElementById('file-input-container').style.display = 'none';
+    } else {
+        document.getElementById('text-input-container').style.display = 'none';
+        document.getElementById('file-input-container').style.display = 'block';
+    }
+}
+
+// بارگذاری کاربران
 async function loadUsers() {
     try {
         const response = await fetch(`/api/get_users?password=${ADMIN_PASSWORD}`);
         const data = await response.json();
         
-        const usersList = document.getElementById('users-list');
-        const statsDiv = document.getElementById('admin-stats');
+        const grid = document.getElementById('users-grid');
+        const statsBadge = document.getElementById('stats-badge');
         
-        usersList.innerHTML = '';
-        statsDiv.innerHTML = `📊 ${data.users.length} کاربر کل`;
+        statsBadge.innerHTML = `${data.users.length} کاربر`;
+        grid.innerHTML = '';
         
         data.users.forEach(user => {
-            const lastActive = new Date(user.last_activity).toLocaleTimeString('fa-IR');
-            const userCard = document.createElement('div');
-            userCard.className = `user-card ${currentUserId == user.id ? 'active' : ''}`;
-            userCard.onclick = () => selectUser(user.id, user.username);
+            const lastActive = new Date(user.last_activity).toLocaleTimeString('fa-IR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
             
-            userCard.innerHTML = `
-                <div class="user-avatar">
-                    ${user.username.charAt(0)}
-                </div>
+            const card = document.createElement('div');
+            card.className = `user-card ${currentUserId == user.id ? 'active' : ''}`;
+            card.onclick = () => selectUser(user.id, user.username);
+            
+            card.innerHTML = `
+                <div class="user-avatar">${user.username.charAt(0)}</div>
                 <div class="user-info">
                     <div class="user-name">${user.username}</div>
                     <div class="user-meta">
-                        <span>💬 ${user.message_count} پیام</span>
-                        <span class="user-time">${lastActive}</span>
+                        <span>💬 ${user.message_count}</span>
+                        <span>🕐 ${lastActive}</span>
                     </div>
                 </div>
             `;
-            usersList.appendChild(userCard);
+            grid.appendChild(card);
         });
     } catch (error) {
-        console.error('خطا در دریافت کاربران:', error);
+        console.error('خطا:', error);
     }
 }
 
-// ==================== انتخاب کاربر ====================
+// انتخاب کاربر
 async function selectUser(userId, username) {
     currentUserId = userId;
+    currentUserName = username;
     
-    // آپدیت ظاهر کاربر انتخاب شده
-    document.querySelectorAll('.user-card').forEach(card => {
-        card.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
-    
-    // آپدیت هدر
-    document.getElementById('chat-header').innerHTML = `
-        <h3>💬 ${username}</h3>
-    `;
-    
-    // نمایش فرم ارسال پیام
+    document.getElementById('selected-user-name').innerHTML = username;
+    document.getElementById('selected-user-status').innerHTML = 'در حال چت...';
     document.getElementById('message-form').style.display = 'block';
     
-    // بارگذاری پیام‌های کاربر
-    await loadUserMessages(userId);
+    document.querySelectorAll('.user-card').forEach(card => card.classList.remove('active'));
+    event.currentTarget.classList.add('active');
     
-    // شروع به‌روزرسانی خودکار
+    await loadMessages(userId);
+    
     if (refreshInterval) clearInterval(refreshInterval);
-    refreshInterval = setInterval(() => loadUserMessages(userId), 3000);
+    refreshInterval = setInterval(() => loadMessages(userId), 3000);
+    
+    // برو به بخش چت
+    showSection('chat');
 }
 
-// ==================== بارگذاری پیام‌های کاربر ====================
-async function loadUserMessages(userId) {
-    if (!userId) return;
-    
+// بارگذاری پیام‌ها
+async function loadMessages(userId) {
     try {
         const response = await fetch(`/api/get_messages?chat_type=admin&password=${ADMIN_PASSWORD}&user_id=${userId}`);
         const data = await response.json();
         
         const container = document.getElementById('messages-container');
-        container.innerHTML = '';
         
         if (data.messages.length === 0) {
             container.innerHTML = '<div class="empty-state">هنوز پیامی وجود ندارد</div>';
             return;
         }
         
+        container.innerHTML = '';
+        
         data.messages.forEach(msg => {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${msg.sender}`;
             
             let contentHtml = '';
+            const time = new Date(msg.timestamp).toLocaleTimeString('fa-IR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
             if (msg.message_type === 'text') {
-                contentHtml = `<div class="message-text">${msg.content}</div>`;
-            } else if (msg.message_type === 'image') {
+                contentHtml = `<div class="message-content">${msg.content}</div>`;
+            } else if (msg.message_type === 'image' && msg.file_path) {
                 contentHtml = `<img src="/uploads/${msg.file_path}" class="message-image" onclick="window.open(this.src)">`;
-            } else if (msg.message_type === 'video') {
+            } else if (msg.message_type === 'video' && msg.file_path) {
                 contentHtml = `<video src="/uploads/${msg.file_path}" controls class="message-video"></video>`;
-            } else if (msg.message_type === 'audio') {
+            } else if (msg.message_type === 'audio' && msg.file_path) {
                 contentHtml = `<audio src="/uploads/${msg.file_path}" controls class="message-audio"></audio>`;
             } else if (msg.file_path) {
                 contentHtml = `<a href="/uploads/${msg.file_path}" target="_blank" class="message-file">📁 دانلود فایل</a>`;
             }
             
-            const time = new Date(msg.timestamp).toLocaleTimeString('fa-IR');
             const senderName = msg.sender === 'user' ? 'کاربر' : (msg.sender === 'admin' ? 'ادمین' : 'هوش مصنوعی');
             
             messageDiv.innerHTML = `
                 <div class="message-header">
-                    <span class="sender">${senderName}</span>
-                    <span class="time">${time}</span>
+                    <span>${senderName}</span>
+                    <span>${time}</span>
                 </div>
                 ${contentHtml}
             `;
@@ -177,38 +608,36 @@ async function loadUserMessages(userId) {
             container.appendChild(messageDiv);
         });
         
-        // اسکرول به پایین
         container.scrollTop = container.scrollHeight;
         
     } catch (error) {
-        console.error('خطا در دریافت پیام‌ها:', error);
+        console.error('خطا:', error);
     }
 }
 
-// ==================== ارسال پیام ادمین ====================
+// ارسال پیام ادمین
 async function sendAdminMessage() {
     if (!currentUserId) {
-        alert('لطفاً ابتدا یک کاربر را انتخاب کنید');
+        alert('لطفاً یک کاربر را انتخاب کنید');
         return;
     }
     
-    const messageType = document.getElementById('messageType').value;
     const formData = new FormData();
     formData.append('user_id', currentUserId);
-    formData.append('message_type', messageType);
+    formData.append('message_type', currentMessageType);
     formData.append('password', ADMIN_PASSWORD);
     
-    if (messageType === 'text') {
-        const text = document.getElementById('messageText').value;
+    if (currentMessageType === 'text') {
+        const text = document.getElementById('message-text').value;
         if (!text.trim()) {
-            alert('لطفاً متن پیام را وارد کنید');
+            alert('متن پیام را وارد کنید');
             return;
         }
         formData.append('content', text);
     } else {
-        const file = document.getElementById('messageFile').files[0];
+        const file = document.getElementById('message-file').files[0];
         if (!file) {
-            alert('لطفاً فایل را انتخاب کنید');
+            alert('فایل را انتخاب کنید');
             return;
         }
         formData.append('file', file);
@@ -223,15 +652,12 @@ async function sendAdminMessage() {
         const result = await response.json();
         
         if (result.status === 'success') {
-            // پاک کردن فرم
-            document.getElementById('messageText').value = '';
-            document.getElementById('messageFile').value = '';
-            document.getElementById('filePreview').innerHTML = '';
-            
-            // بارگذاری مجدد پیام‌ها
-            await loadUserMessages(currentUserId);
+            document.getElementById('message-text').value = '';
+            document.getElementById('message-file').value = '';
+            document.getElementById('file-preview').innerHTML = '';
+            await loadMessages(currentUserId);
         } else {
-            alert('خطا در ارسال پیام: ' + result.message);
+            alert('خطا: ' + result.message);
         }
     } catch (error) {
         console.error('خطا:', error);
@@ -239,28 +665,9 @@ async function sendAdminMessage() {
     }
 }
 
-// ==================== به‌روزرسانی کاربران ====================
-function refreshUsers() {
-    loadUsers();
-}
-
-// ==================== مدیریت تغییر نوع پیام ====================
-document.getElementById('messageType').addEventListener('change', function() {
-    const textInput = document.getElementById('textInput');
-    const fileInput = document.getElementById('fileInput');
-    
-    if (this.value === 'text') {
-        textInput.classList.add('active');
-        fileInput.classList.remove('active');
-    } else {
-        textInput.classList.remove('active');
-        fileInput.classList.add('active');
-    }
-});
-
-// ==================== پیش‌نمایش فایل ====================
-document.getElementById('messageFile').addEventListener('change', function(e) {
-    const preview = document.getElementById('filePreview');
+// پیش‌نمایش فایل
+document.getElementById('message-file')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('file-preview');
     const file = e.target.files[0];
     
     if (!file) {
@@ -275,332 +682,18 @@ document.getElementById('messageFile').addEventListener('change', function(e) {
         };
         reader.readAsDataURL(file);
     } else {
-        preview.innerHTML = `<div class="file-info">📁 ${file.name}</div>`;
+        preview.innerHTML = `<div>📁 ${file.name}</div>`;
     }
 });
 
-// ==================== بارگذاری اولیه ====================
+// بارگذاری اولیه
 document.addEventListener('DOMContentLoaded', () => {
     loadUsers();
 });
 
-// ==================== پاکسازی اینتروال در صورت خروج ====================
+// پاکسازی اینتروال
 window.addEventListener('beforeunload', () => {
     if (refreshInterval) clearInterval(refreshInterval);
 });
 </script>
-
-<style>
-.admin-panel {
-    padding: 20px;
-    direction: rtl;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.admin-header {
-    background: white;
-    padding: 15px 25px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.admin-controls {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 20px;
-    flex: 1;
-    min-height: 0;
-}
-
-/* ===== سایدبار کاربران ===== */
-.users-sidebar {
-    background: white;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.sidebar-header {
-    padding: 15px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.sidebar-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.refresh-btn {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.refresh-btn:hover {
-    background: #0056b3;
-}
-
-.users-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.user-card {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 8px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.user-card:hover {
-    background: #e9ecef;
-    transform: translateX(-5px);
-}
-
-.user-card.active {
-    background: #007bff;
-    color: white;
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    background: #6c757d;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    margin-left: 10px;
-}
-
-.user-info {
-    flex: 1;
-}
-
-.user-name {
-    font-weight: bold;
-    margin-bottom: 3px;
-}
-
-.user-meta {
-    font-size: 0.8rem;
-    display: flex;
-    justify-content: space-between;
-    color: #6c757d;
-}
-
-.user-card.active .user-meta {
-    color: #e0e0e0;
-}
-
-.user-time {
-    font-size: 0.7rem;
-}
-
-/* ===== بخش چت ===== */
-.chat-section {
-    background: white;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.chat-header {
-    padding: 15px 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.chat-header h3 {
-    margin: 0;
-    color: #495057;
-}
-
-.messages-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background: #f8f9fa;
-}
-
-.empty-state {
-    text-align: center;
-    color: #6c757d;
-    padding: 40px;
-}
-
-.message {
-    margin-bottom: 15px;
-    max-width: 70%;
-}
-
-.message.user {
-    margin-left: auto;
-}
-
-.message.ai, .message.admin {
-    margin-right: auto;
-}
-
-.message-header {
-    font-size: 0.8rem;
-    margin-bottom: 5px;
-    color: #6c757d;
-}
-
-.message .sender {
-    font-weight: bold;
-}
-
-.message .time {
-    margin-right: 10px;
-}
-
-.message-text {
-    padding: 10px 15px;
-    border-radius: 15px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.message.user .message-text {
-    background: #007bff;
-    color: white;
-}
-
-.message-image, .message-video {
-    max-width: 100%;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-.message-audio {
-    width: 100%;
-}
-
-.message-file {
-    display: inline-block;
-    padding: 8px 15px;
-    background: #28a745;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-/* ===== فرم ارسال ===== */
-.admin-message-form {
-    padding: 20px;
-    background: white;
-    border-top: 2px solid #dee2e6;
-}
-
-.message-type-selector {
-    margin-bottom: 15px;
-}
-
-.message-type-selector select {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ced4da;
-    width: 200px;
-}
-
-.text-input, .file-input {
-    display: none;
-    margin-bottom: 15px;
-}
-
-.text-input.active, .file-input.active {
-    display: block;
-}
-
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    resize: vertical;
-}
-
-input[type="file"] {
-    margin-bottom: 10px;
-}
-
-.file-preview {
-    max-width: 200px;
-    margin-top: 10px;
-}
-
-.preview-image {
-    max-width: 100%;
-    border-radius: 5px;
-}
-
-.file-info {
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 5px;
-}
-
-.form-actions {
-    text-align: left;
-}
-
-.send-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.send-btn:hover {
-    background: #218838;
-}
-
-/* ===== اسکرول‌بار ===== */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-</style>
 {% endblock %}
