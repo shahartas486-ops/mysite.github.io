@@ -1,0 +1,1092 @@
+/**
+ * فایل انیمیشن‌های پروژه
+ * شامل تمام انیمیشن‌ها و transition‌ها
+ */
+
+/* انیمیشن‌های کلی */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        transform: scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(67, 97, 238, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(67, 97, 238, 0.8);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-20px) rotate(5deg);
+    }
+    66% {
+        transform: translateY(-10px) rotate(-5deg);
+    }
+}
+
+@keyframes wave {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes typingDots {
+    0%, 100% {
+        opacity: 0.2;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes flyIn {
+    0% {
+        transform: translateX(100vw) rotate(360deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* کلاس‌های انیمیشن */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.5s ease-out;
+}
+
+.animate-slide-up {
+    animation: slideInFromBottom 0.5s ease-out;
+}
+
+.animate-slide-down {
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+.animate-slide-left {
+    animation: slideInFromLeft 0.5s ease-out;
+}
+
+.animate-slide-right {
+    animation: slideInFromRight 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+.animate-scale-out {
+    animation: scaleOut 0.3s ease-out;
+}
+
+.animate-rotate {
+    animation: rotate 2s linear infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.animate-glow {
+    animation: glow 2s infinite;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-wave {
+    animation: wave 1s ease-in-out infinite;
+}
+
+.animate-ripple {
+    animation: ripple 2s linear infinite;
+}
+
+.animate-typing {
+    animation: typingDots 1.5s infinite ease-in-out;
+}
+
+.animate-gradient {
+    background: linear-gradient(-45deg, #4361ee, #3a0ca3, #4cc9f0, #f72585);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+.animate-shimmer {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 3s infinite;
+}
+
+.animate-fly-in {
+    animation: flyIn 1s ease-out;
+}
+
+/* انیمیشن‌های مخصوص المان‌ها */
+.message-appear {
+    animation: messageAppear 0.4s ease-out;
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.bot-float {
+    animation: botFloat 3s ease-in-out infinite;
+}
+
+@keyframes botFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-10px) rotate(5deg);
+    }
+    50% {
+        transform: translateY(-5px) rotate(-5deg);
+    }
+    75% {
+        transform: translateY(-15px) rotate(3deg);
+    }
+}
+
+.notification-slide-in {
+    animation: notificationSlideIn 0.3s forwards;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-slide-out {
+    animation: notificationSlideOut 0.3s forwards;
+}
+
+@keyframes notificationSlideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.modal-fade-in {
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-slide-up {
+    animation: modalSlideUp 0.4s ease;
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.button-press {
+    animation: buttonPress 0.2s ease;
+}
+
+@keyframes buttonPress {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.typing-indicator-animation {
+    animation: typingIndicator 1.5s infinite;
+}
+
+@keyframes typingIndicator {
+    0%, 100% {
+        opacity: 0.4;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+}
+
+.connection-pulse {
+    animation: connectionPulse 2s infinite;
+}
+
+@keyframes connectionPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(76, 201, 240, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(76, 201, 240, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 201, 240, 0);
+    }
+}
+
+.file-upload-progress {
+    animation: fileUploadProgress 2s ease-in-out infinite;
+}
+
+@keyframes fileUploadProgress {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+.ai-response-loading {
+    animation: aiResponseLoading 1.5s infinite;
+}
+
+@keyframes aiResponseLoading {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.highlight-message {
+    animation: highlightMessage 2s ease;
+}
+
+@keyframes highlightMessage {
+    0% {
+        background-size: 0% 100%;
+    }
+    50% {
+        background-size: 100% 100%;
+    }
+    100% {
+        background-size: 0% 100%;
+    }
+}
+
+.page-transition {
+    animation: pageTransition 0.5s ease;
+}
+
+@keyframes pageTransition {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.theme-transition {
+    animation: themeTransition 0.5s ease;
+}
+
+@keyframes themeTransition {
+    from {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* انیمیشن‌های پیشرفته برای المان‌های خاص */
+.ai-brain {
+    animation: aiBrain 2s infinite alternate;
+}
+
+@keyframes aiBrain {
+    0% {
+        filter: drop-shadow(0 0 5px #4361ee);
+    }
+    100% {
+        filter: drop-shadow(0 0 20px #4cc9f0);
+    }
+}
+
+.chat-bubble {
+    animation: chatBubble 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes chatBubble {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.6);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.ripple-effect:focus:not(:active)::after {
+    animation: rippleEffect 1s ease-out;
+}
+
+@keyframes rippleEffect {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+/* انیمیشن‌های اسکرول */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+.scroll-fade-in {
+    animation: scrollFadeIn 0.5s ease-out;
+}
+
+@keyframes scrollFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* انیمیشن‌های hover */
+.hover-lift {
+    transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.hover-grow {
+    transition: transform 0.3s ease;
+}
+
+.hover-grow:hover {
+    transform: scale(1.05);
+}
+
+.hover-rotate {
+    transition: transform 0.3s ease;
+}
+
+.hover-rotate:hover {
+    transform: rotate(5deg);
+}
+
+.hover-shake {
+    transition: transform 0.3s ease;
+}
+
+.hover-shake:hover {
+    animation: shake 0.5s;
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+}
+
+/* انیمیشن‌های loading */
+.loading-dots::after {
+    content: '.';
+    animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+    0%, 100% {
+        content: '.';
+    }
+    33% {
+        content: '..';
+    }
+    66% {
+        content: '...';
+    }
+}
+
+.loading-bar {
+    animation: loadingBar 2s ease-in-out infinite;
+}
+
+@keyframes loadingBar {
+    0%, 100% {
+        width: 0%;
+    }
+    50% {
+        width: 100%;
+    }
+}
+
+/* انیمیشن‌های ویژه برای حالت‌های مختلف */
+.online-pulse {
+    animation: onlinePulse 3s infinite;
+}
+
+@keyframes onlinePulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.offline-fade {
+    animation: offlineFade 2s infinite alternate;
+}
+
+@keyframes offlineFade {
+    from {
+        opacity: 0.3;
+    }
+    to {
+        opacity: 0.7;
+    }
+}
+
+.error-flash {
+    animation: errorFlash 0.5s;
+}
+
+@keyframes errorFlash {
+    0%, 100% {
+        background-color: inherit;
+    }
+    50% {
+        background-color: rgba(247, 37, 133, 0.3);
+    }
+}
+
+.success-glow {
+    animation: successGlow 2s;
+}
+
+@keyframes successGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(76, 201, 240, 0);
+    }
+    50% {
+        box-shadow: 0 0 20px 5px rgba(76, 201, 240, 0.5);
+    }
+}
+
+/* انیمیشن‌های پیچیده */
+.cyber-grid {
+    background-image: 
+        linear-gradient(rgba(67, 97, 238, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(67, 97, 238, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: cyberGrid 20s linear infinite;
+}
+
+@keyframes cyberGrid {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 50px 50px;
+    }
+}
+
+.neon-border {
+    animation: neonBorder 2s infinite alternate;
+}
+
+@keyframes neonBorder {
+    from {
+        box-shadow: 
+            0 0 5px #4361ee,
+            0 0 10px #4361ee,
+            0 0 15px #4361ee,
+            inset 0 0 5px #4361ee;
+    }
+    to {
+        box-shadow: 
+            0 0 10px #4cc9f0,
+            0 0 20px #4cc9f0,
+            0 0 30px #4cc9f0,
+            inset 0 0 10px #4cc9f0;
+    }
+}
+
+.particle-system {
+    position: relative;
+}
+
+.particle {
+    position: absolute;
+    background: rgba(67, 97, 238, 0.6);
+    border-radius: 50%;
+    animation: particleFloat 5s infinite linear;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* کلاس‌های utility برای انیمیشن‌ها */
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
+
+.delay-1000 {
+    animation-delay: 1000ms;
+}
+
+.duration-100 {
+    animation-duration: 100ms;
+}
+
+.duration-200 {
+    animation-duration: 200ms;
+}
+
+.duration-300 {
+    animation-duration: 300ms;
+}
+
+.duration-500 {
+    animation-duration: 500ms;
+}
+
+.duration-1000 {
+    animation-duration: 1000ms;
+}
+
+.ease-in {
+    animation-timing-function: ease-in;
+}
+
+.ease-out {
+    animation-timing-function: ease-out;
+}
+
+.ease-in-out {
+    animation-timing-function: ease-in-out;
+}
+
+.linear {
+    animation-timing-function: linear;
+}
+
+.infinite {
+    animation-iteration-count: infinite;
+}
+
+.paused {
+    animation-play-state: paused;
+}
+
+.running {
+    animation-play-state: running;
+}
+
+/* انیمیشن‌های برای دستگاه‌های لمسی */
+.tap-feedback {
+    animation: tapFeedback 0.3s ease;
+}
+
+@keyframes tapFeedback {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* استایل‌های ریسپانسیو برای انیمیشن‌ها */
+@media (max-width: 768px) {
+    .mobile-slide-up {
+        animation: slideInFromBottom 0.4s ease-out;
+    }
+    
+    .mobile-slide-down {
+        animation: slideInFromTop 0.4s ease-out;
+    }
+    
+    .mobile-fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+}
+
+/* کاهش انیمیشن‌ها برای کاربرانی که ترجیح می‌دهند */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* انیمیشن‌های سفارشی برای پروژه چت */
+.ai-typing {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.ai-typing span {
+    width: 8px;
+    height: 8px;
+    background: #4cc9f0;
+    border-radius: 50%;
+    animation: aiTyping 1.5s infinite ease-in-out;
+}
+
+.ai-typing span:nth-child(1) { animation-delay: 0s; }
+.ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+.ai-typing span:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes aiTyping {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+.message-send {
+    animation: messageSend 0.4s ease-out;
+}
+
+@keyframes messageSend {
+    from {
+        opacity: 0;
+        transform: translateX(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.message-receive {
+    animation: messageReceive 0.4s ease-out;
+}
+
+@keyframes messageReceive {
+    from {
+        opacity: 0;
+        transform: translateX(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* انیمیشن‌های برای تأکید */
+.attention-pulse {
+    animation: attentionPulse 2s infinite;
+}
+
+@keyframes attentionPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(247, 37, 133, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(247, 37, 133, 0);
+    }
+}
+
+.important-bounce {
+    animation: importantBounce 1s infinite;
+}
+
+@keyframes importantBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(-5px);
+    }
+    50% {
+        transform: translateY(0);
+    }
+    75% {
+        transform: translateY(-3px);
+    }
+}
+
+/* انیمیشن‌های لودینگ پیشرفته */
+.loading-ai {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.loading-ai::before,
+.loading-ai::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+}
+
+.loading-ai::before {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #4361ee, #4cc9f0);
+    animation: loadingAiOuter 2s linear infinite;
+}
+
+.loading-ai::after {
+    width: 40px;
+    height: 40px;
+    background: #1a1a2e;
+    top: 10px;
+    left: 10px;
+    animation: loadingAiInner 2s linear infinite;
+}
+
+@keyframes loadingAiOuter {
+    0% {
+        transform: rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+        filter: hue-rotate(360deg);
+    }
+}
+
+@keyframes loadingAiInner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(-720deg);
+    }
+}
+
+/* انیمیشن‌های برای ربات */
+.bot-eye {
+    animation: botEye 3s infinite alternate;
+}
+
+@keyframes botEye {
+    0%, 100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(0.1);
+    }
+}
+
+.bot-mouth {
+    animation: botMouth 2s infinite alternate;
+}
+
+@keyframes botMouth {
+    0%, 100% {
+        transform: scaleX(1);
+    }
+    50% {
+        transform: scaleX(1.2);
+    }
+}
+
+/* انیمیشن‌های برای پیشرفت */
+.progress-glow {
+    animation: progressGlow 2s infinite alternate;
+}
+
+@keyframes progressGlow {
+    from {
+        box-shadow: 0 0 10px rgba(67, 97, 238, 0.5);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
+    }
+}
