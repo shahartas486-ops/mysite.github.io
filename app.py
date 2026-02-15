@@ -1,4 +1,3 @@
-# در app.py
 import os
 import uuid
 from datetime import datetime
@@ -45,34 +44,21 @@ def process_latex(text):
     
     return text
 
-def get_client_ip():
-    """دریافت IP واقعی کاربر با در نظر گرفتن پراکسی"""
-    if request.headers.get('X-Forwarded-For'):
-        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
-    elif request.headers.get('X-Real-IP'):
-        return request.headers.get('X-Real-IP')
-    else:
-        return request.remote_addr
-
 # Routes
 @app.route('/')
 def index():
-    # استفاده از ترکیبی از session و IP برای امنیت بیشتر
-    if 'user_id' not in session:
-        client_ip = get_client_ip()
-        user_agent = request.headers.get('User-Agent', '')
-        # ایجاد یک شناسه منحصر به فرد از ترکیب IP و User-Agent
-        unique_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{client_ip}:{user_agent}"))
-        session['user_id'] = unique_id
+    session_id = session.get('session_id')
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        session['session_id'] = session_id
     
-    # ذخیره در دیتابیس با IP
-    user_id = db.get_or_create_user(session['user_id'], client_ip=get_client_ip())
-    return render_template('index.html', user_id=user_id)
+    user_id = db.get_or_create_user(session_id)
+    return render_template('index.html', session_id=session_id)
 
 @app.route('/admin')
 def admin_panel():
     password = request.args.get('password', '')
-    if password != os.environ.get('ADMIN_PASSWORD', 'admin123'):
+    if password != 'admin123':
         return 'دسترسی غیرمجاز', 403
     return render_template('admin.html')
 
@@ -81,10 +67,11 @@ def admin_panel():
 def send_message():
     try:
         data = request.form
-        if 'user_id' not in session:
-            return jsonify({'status': 'error', 'message': 'Session not found'}), 401
+        session_id = session.get('session_id')
+        if not session_id:
+            return jsonify({'status': 'error', 'message': 'Session not found'})
         
-        user_id = db.get_or_create_user(session['user_id'])
+        user_id = db.get_or_create_user(session_id)
         message_type = data.get('message_type', 'text')
         content = data.get('content', '')
         chat_type = data.get('chat_type', 'ai')
@@ -117,39 +104,40 @@ def send_message():
         return jsonify({'status': 'success', 'user_id': user_id})
     
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': str(e)})
 
+# ========== بخش اصلاح شده برای رفع مشکل امنیتی ==========
 @app.route('/api/get_messages')
 def api_get_messages():
     chat_type = request.args.get('chat_type', 'ai')
+    session_id = session.get('session_id')
     
-    # **بخش اصلاح شده - مهمترین تغییرات اینجاست**
+    # کاربر عادی - فقط پیام‌های خودش
     if chat_type == 'ai':
-        # کاربر عادی - فقط پیام‌های خودش
-        if 'user_id' not in session:
+        if not session_id:
             return jsonify({'messages': []})
         
-        user_id = db.get_or_create_user(session['user_id'])
+        user_id = db.get_or_create_user(session_id)
         messages = db.get_messages(user_id, 50)
-        
+    
+    # ادمین - با پسورد چک میشه
     elif chat_type == 'admin':
-        # ادمین - همه پیام‌ها رو می‌بینه
         password = request.args.get('password', '')
-        if password != os.environ.get('ADMIN_PASSWORD', 'admin123'):
-            return jsonify({'status': 'error', 'message': 'دسترسی غیرمجاز'}), 403
+        if password != 'admin123':
+            return jsonify({'messages': []})
         
-        # برای ادمین، می‌تونیم همه پیام‌ها رو برگردونیم
-        specific_user = request.args.get('user_id')
-        if specific_user and specific_user.isdigit():
-            messages = db.get_messages(int(specific_user), 50)
+        user_id = request.args.get('user_id')
+        if user_id and user_id.isdigit():
+            messages = db.get_messages(int(user_id), 50)
         else:
             messages = db.get_messages(limit=50)
     
+    # حالت پیش‌فرض - امن
     else:
-        # حالت پیش‌فرض - فقط پیام‌های خود کاربر
-        if 'user_id' not in session:
+        if not session_id:
             return jsonify({'messages': []})
-        user_id = db.get_or_create_user(session['user_id'])
+        
+        user_id = db.get_or_create_user(session_id)
         messages = db.get_messages(user_id, 50)
     
     # پردازش LaTeX
@@ -158,13 +146,14 @@ def api_get_messages():
             msg['content'] = process_latex(msg['content'])
     
     return jsonify({'messages': messages})
+# ========== پایان بخش اصلاح شده ==========
 
 @app.route('/api/get_users')
 def get_users_api():
-    # فقط ادمین می‌تونه لیست کاربران رو ببینه
+    # فقط ادمین می‌تونه ببینه
     password = request.args.get('password', '')
-    if password != os.environ.get('ADMIN_PASSWORD', 'admin123'):
-        return jsonify({'status': 'error', 'message': 'دسترسی غیرمجاز'}), 403
+    if password != 'admin123':
+        return jsonify({'users': []})
     
     users = db.get_all_users()
     return jsonify({'users': users})
@@ -172,9 +161,9 @@ def get_users_api():
 @app.route('/api/admin/send', methods=['POST'])
 def admin_send():
     try:
-        # تأیید ادمین
+        # بررسی پسورد ادمین
         password = request.form.get('password', '')
-        if password != os.environ.get('ADMIN_PASSWORD', 'admin123'):
+        if password != 'admin123':
             return jsonify({'status': 'error', 'message': 'دسترسی غیرمجاز'}), 403
         
         data = request.form
@@ -202,14 +191,12 @@ def admin_send():
         return jsonify({'status': 'success'})
     
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    # فقط صاحب فایل یا ادمین می‌تونه ببینه
-    # این قسمت رو هم می‌تونی امن‌تر کنی
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.secret_key = os.environ.get('SECRET_KEY', 'fallback-secret-key')
+    app.secret_key = 'super-secret-key-change-in-production'
     app.run(debug=True, port=5000, host='0.0.0.0')
